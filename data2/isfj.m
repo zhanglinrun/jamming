@@ -16,6 +16,23 @@ function ISFJ = isfj(N,JSR,ts,chip,tfr,n0,Nr,mul,tau,judge,fd,t)
     flip = [list(1,1:n0),zeros(1,N-n0)];
     tchip = chip.*flip;
 %     pisfj = ISFJ;
+
+    % ---- Robust length/shape handling ----
+    % Ensure t is a row vector of length exactly 2N.
+    t = t(:).';
+    if numel(t) < 2*N
+        t = [t, (t(end) + ts*(1:(2*N-numel(t))))];
+    elseif numel(t) > 2*N
+        t = t(1:2*N);
+    end
+
+    % Ensure fd has at least Nr elements.
+    if numel(fd) < Nr
+        fd = [fd(:).', zeros(1, Nr-numel(fd))];
+    else
+        fd = fd(:).';
+    end
+
     aISFJ = [tchip*A(1),zeros(1,N)].*exp(1i*2*pi*fd(1)*t);
     nTr = 0;
     for i = 2:1:Nr

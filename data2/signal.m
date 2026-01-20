@@ -3,11 +3,15 @@ function [Signal,t,t2t,t0,n0,N,usignal,k,ts,nxt,chip] = signal(B,fs,fo,tau,Tr,SP
     ts = 1/fs;%采样周期
     % t = -ext:ts:(Tr+ext); %以ts为间隔产生Tr/ts个抽样
     t = 0:ts:Tr; %以ts为间隔产生Tr/ts个抽样
-    % t2t = -ext:ts:(2*Tr+3*ext+ts);
-    t2t = 0:ts:2*Tr+ts;
+
+    % 【关键修复】若 Tr/ts 不是整数，用 colon 生成的数组长度有时会出现
+    % t2t 长度为 2N+1，导致 isfj/dftj 中进行 1x(2N) .* 1x(2N+1) 报错。
+    % 因此用索引方式明确保证 t2t 长度恆为 2N。
+    N = length(t);
+    t2t = (0:(2*N-1)) * ts;
     t0 = -tau/2:ts:tau/2;%0:ts:tau;%
     n0 = length(t0);
-    N = length(t);
+    % N 已在上面计算，保持输出一致
     nxt = round(ext/ts);
     p = 10^(SP/10);
     A = sqrt(p);
